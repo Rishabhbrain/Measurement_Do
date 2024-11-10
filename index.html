@@ -140,6 +140,10 @@
 
             <div class="tooltip" id="tooltip"></div>
         </form>
+        <footer class="text-center mt-6 text-sm text-gray-600">
+            <p>&copy; 2024 <strong>TheRishWay</strong>. All rights reserved.</p>
+        </footer>
+        
     </div>
     <script>
         $(document).ready(function() {
@@ -218,7 +222,7 @@
                 const customerName = $('#customerName').val();
                 const contactNumber = $('#contactNumber').val();
                 const garmentType = $('#garmentType').val();
-                const tailorContact = $('#tailorContact').val();
+                const tailorContact = $('#tailorContact').val();  // Get the tailor's contact number
     
                 const measurementsData = {
                     customerName,
@@ -234,35 +238,26 @@
                     measurementsData.measurements[label] = $(this).val();
                 });
     
-                // Create a more structured message
-                let whatsappMessage = `
-    *Customer Name:* ${customerName}
-    *Contact Number:* ${contactNumber}
-    *Garment Type:* ${garmentType.charAt(0).toUpperCase() + garmentType.slice(1)}
+                // Format the WhatsApp message neatly
+                let whatsappMessage = `*Customer Information:*\n`;
+                whatsappMessage += `Customer Name: ${customerName}\n`;
+                whatsappMessage += `Contact Number: ${contactNumber}\n`;
+                whatsappMessage += `Garment Type: ${garmentType}\n\n`;
+                whatsappMessage += `*Measurements:*\n`;
     
-    *Measurements:*
-    `;
-    
-                // Loop through the measurements and format them neatly
-                for (let measurement in measurementsData.measurements) {
-                    if (measurementsData.measurements.hasOwnProperty(measurement)) {
-                        whatsappMessage += `
-    - *${measurement}:* ${measurementsData.measurements[measurement]} cm`;
-                    }
+                for (const [label, value] of Object.entries(measurementsData.measurements)) {
+                    whatsappMessage += `${label}: ${value}\n`;
                 }
     
-                // Add the date and tailor contact
-                whatsappMessage += `
-        
-    *Tailor's Contact:* ${tailorContact}
-    *Date and Time:* ${measurementsData.dateTime}
-                `;
+                whatsappMessage += `\nDate and Time: ${measurementsData.dateTime}`;
     
-                // Encode the message and open WhatsApp
-                window.open(`https://wa.me/?text=${encodeURIComponent(whatsappMessage.trim())}`, '_blank');
+                // Send the formatted message to the tailor's contact
+                const encodedMessage = encodeURIComponent(whatsappMessage);
+                window.open(`https://wa.me/${tailorContact}?text=${encodedMessage}`, '_blank');
             });
         });
     </script>
     
 </body>
+
 </html>
