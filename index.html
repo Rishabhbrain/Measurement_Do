@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Measurement Taking Platform</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        body {
+            background: linear-gradient(135deg, #e3f2fd, #f9f9f9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            font-family: Arial, sans-serif;
+        }
+        .form-container {
+            background-color: #ffffff;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+            border-radius: 16px;
+            padding: 20px;
+            width: 100%;
+            max-width: 600px;
+            position: relative;
+            transition: transform 0.3s ease;
+        }
+        .form-container:hover {
+            transform: scale(1.02);
+        }
+        .input-label {
+            color: #333333;
+            display: flex;
+            align-items: center;
+            font-size: 14px;
+            font-weight: 600;
+            margin-top: 12px;
+        }
+        .input-field {
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            padding: 12px;
+            margin-top: 4px;
+            width: 100%;
+            transition: border-color 0.3s ease;
+        }
+        .input-field:focus {
+            border-color: #6cb6f9;
+            outline: none;
+        }
+        .btn-primary {
+            background-color: #6cb6f9;
+            color: #ffffff;
+            font-weight: bold;
+            padding: 12px 20px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            width: 100%;
+        }
+        .btn-primary:hover {
+            background-color: #5aa7e3;
+        }
+        .info-button {
+            display: inline-flex;
+            width: 20px;
+            height: 20px;
+            background-color: #e3f2fd;
+            border-radius: 50%;
+            color: #1976d2;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            cursor: pointer;
+            margin-left: 6px;
+            transition: background-color 0.3s;
+            position: relative;
+        }
+        .info-button:hover {
+            background-color: #d1e8f9;
+        }
+        .tooltip {
+            display: none;
+            position: absolute;
+            background-color: #f8f8f8; /* Off-white background */
+            border-radius: 8px;
+            padding: 12px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+            color: #333333;
+            font-size: 14px; /* Larger font size */
+            z-index: 100;
+            width: 220px;
+            text-align: left;
+        }
+        .tooltip::before {
+            content: "";
+            position: absolute;
+            top: 10px;
+            right: -6px;
+            border-width: 6px;
+            border-style: solid;
+            border-color: transparent #f8f8f8 transparent transparent; /* Arrow pointing left */
+        }
+    </style>
+</head>
+<body>
+    <div class="form-container">
+        <h1 class="text-2xl font-bold text-center text-gray-800 mb-4">Tailor Measurement Platform</h1>
+        <form id="measurementForm">
+            <h2 class="text-lg font-semibold mb-2 text-gray-700">Customer Information</h2>
+
+            <label for="customerName" class="input-label">Customer Name</label>
+            <input type="text" id="customerName" required class="input-field" placeholder="Enter your name">
+
+            <label for="contactNumber" class="input-label">Contact Number</label>
+            <input type="tel" id="contactNumber" required class="input-field" placeholder="Enter your contact number">
+
+            <label for="garmentType" class="input-label">Select Garment Type</label>
+            <select id="garmentType" required class="input-field">
+                <option value="">Choose a garment type</option>
+                <option value="shirt">Shirt</option>
+                <option value="pants">Pants</option>
+                <option value="suit">Suit</option>
+            </select>
+
+            <div id="measurements" class="hidden mt-4"></div>
+
+            <label for="tailorContact" class="input-label">Tailor's Contact Number</label>
+            <input type="tel" id="tailorContact" required class="input-field" placeholder="Enter tailor's contact number">
+
+            <button type="submit" class="btn-primary mt-6">
+                <span>Send to WhatsApp</span>
+                <img src="https://img.icons8.com/ios-glyphs/24/ffffff/whatsapp.png" alt="WhatsApp Icon">
+            </button>
+
+            <div class="tooltip" id="tooltip"></div>
+        </form>
+    </div>
+    <script>
+        $(document).ready(function() {
+            $('#garmentType').change(function() {
+                const garmentType = $(this).val();
+                let measurementInputs = '';
+    
+                if (garmentType === 'shirt') {
+                    measurementInputs = `
+                        ${generateMeasurementInput('Chest Measurement', 'Measure around the fullest part of your chest.')}
+                        ${generateMeasurementInput('Waist Measurement', 'Measure around your natural waistline.')}
+                        ${generateMeasurementInput('Sleeve Length', 'Measure from shoulder to wrist.')}
+                        ${generateMeasurementInput('Shoulder Width', 'Measure across the back from shoulder to shoulder.')}
+                        ${generateMeasurementInput('Neck Size', 'Measure around the base of your neck.')}
+                        ${generateMeasurementInput('Length of Shirt', 'Measure from the top of the shoulder to the desired length.')}
+                        ${generateMeasurementInput('Cuff Width', 'Measure around your wrist for cuff size.')}
+                    `;
+                } else if (garmentType === 'pants') {
+                    measurementInputs = `
+                        ${generateMeasurementInput('Waist Measurement', 'Measure around your natural waistline.')}
+                        ${generateMeasurementInput('Hip Measurement', 'Measure around the fullest part of your hips.')}
+                        ${generateMeasurementInput('Inseam Length', 'Measure from the top of your inner thigh to your ankle.')}
+                        ${generateMeasurementInput('Thigh Measurement', 'Measure around the fullest part of your thigh.')}
+                        ${generateMeasurementInput('Knee Measurement', 'Measure around your knee while standing straight.')}
+                        ${generateMeasurementInput('Length of Pants', 'Measure from the waist to the desired length of pants.')}
+                        ${generateMeasurementInput('Bottom Width', 'Measure the desired width of the pants at the ankle.')}
+                    `;
+                } else if (garmentType === 'suit') {
+                    measurementInputs = `
+                        ${generateMeasurementInput('Chest Measurement', 'Measure around the fullest part of your chest.')}
+                        ${generateMeasurementInput('Waist Measurement', 'Measure around your natural waistline.')}
+                        ${generateMeasurementInput('Hip Measurement', 'Measure around the fullest part of your hips.')}
+                        ${generateMeasurementInput('Sleeve Length', 'Measure from shoulder to wrist with arm slightly bent.')}
+                        ${generateMeasurementInput('Shoulder Width', 'Measure across the back from shoulder to shoulder.')}
+                        ${generateMeasurementInput('Jacket Length', 'Measure from the base of your neck to the desired length of the jacket.')}
+                        ${generateMeasurementInput('Pant Waist Measurement', 'Measure around your waist for pants.')}
+                        ${generateMeasurementInput('Inseam Length', 'Measure from the top of your inner thigh to your ankle.')}
+                        ${generateMeasurementInput('Cuff Width', 'Measure around your wrist for jacket cuffs.')}
+                    `;
+                }
+    
+                $('#measurements').html(measurementInputs).removeClass('hidden').hide().fadeIn();
+            });
+    
+            function generateMeasurementInput(label, description) {
+                return `
+                    <div class='relative mt-4'>
+                        <label class='input-label'>${label}</label>
+                        <input type='number' required class='input-field' placeholder='Enter ${label.toLowerCase()}'>
+                        <span class='info-button' data-description='${description}'>i</span>
+                    </div>`;
+            }
+    
+            $(document).on('mouseenter', '.info-button', function() {
+                const description = $(this).data('description');
+                const tooltip = $('#tooltip');
+                tooltip.text(description);
+    
+                // Calculate position
+                const button = $(this);
+                const offset = button.offset();
+                const buttonWidth = button.outerWidth();
+                const tooltipWidth = tooltip.outerWidth();
+    
+                tooltip.css({
+                    top: offset.top + 10 + 'px',
+                    left: offset.left - tooltipWidth - 10 + 'px',
+                }).fadeIn();
+            }).on('mouseleave', '.info-button', function() {
+                $('#tooltip').fadeOut();
+            });
+    
+            $('#measurementForm').submit(function(event) {
+                event.preventDefault();
+    
+                const customerName = $('#customerName').val();
+                const contactNumber = $('#contactNumber').val();
+                const garmentType = $('#garmentType').val();
+                const tailorContact = $('#tailorContact').val();
+    
+                const measurementsData = {
+                    customerName,
+                    contactNumber,
+                    garmentType,
+                    tailorContact,
+                    dateTime: new Date().toLocaleString(),
+                    measurements: {}
+                };
+    
+                $('#measurements input[type=number]').each(function() {
+                    const label = $(this).prev('label').text().trim();
+                    measurementsData.measurements[label] = $(this).val();
+                });
+    
+                // Create a more structured message
+                let whatsappMessage = `
+    *Customer Name:* ${customerName}
+    *Contact Number:* ${contactNumber}
+    *Garment Type:* ${garmentType.charAt(0).toUpperCase() + garmentType.slice(1)}
+    
+    *Measurements:*
+    `;
+    
+                // Loop through the measurements and format them neatly
+                for (let measurement in measurementsData.measurements) {
+                    if (measurementsData.measurements.hasOwnProperty(measurement)) {
+                        whatsappMessage += `
+    - *${measurement}:* ${measurementsData.measurements[measurement]} cm`;
+                    }
+                }
+    
+                // Add the date and tailor contact
+                whatsappMessage += `
+        
+    *Tailor's Contact:* ${tailorContact}
+    *Date and Time:* ${measurementsData.dateTime}
+                `;
+    
+                // Encode the message and open WhatsApp
+                window.open(`https://wa.me/?text=${encodeURIComponent(whatsappMessage.trim())}`, '_blank');
+            });
+        });
+    </script>
+    
+</body>
+</html>
